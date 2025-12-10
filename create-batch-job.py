@@ -1,3 +1,6 @@
+"""
+EXAMPLE OF SENDING & RETRIVING BATCH REQUEST VIA GEMINI API
+"""
 
 import json
 from google import genai
@@ -8,6 +11,21 @@ import time
 client = genai.Client()
 
 
+"""
+For larger sets of requests, prepare a JSON Lines (JSONL) file. Each line in this file must be a JSON object containing a user-defined key and a request object, where the request is a valid GenerateContentRequest object. The user-defined key is used in the response to indicate which output is the result of which request.
+
+"""
+
+
+# Create a sample JSONL file
+with open("my-batch-requests.jsonl", "w") as f:
+    requests = [
+        {"key": "request-1", "request": {"contents": [{"parts": [{"text": "Describe the process of photosynthesis."}]}]}},
+        {"key": "request-2", "request": {"contents": [{"parts": [{"text": "What are the main ingredients in a Margherita pizza?"}]}]}}
+    ]
+    for req in requests:
+        f.write(json.dumps(req) + "\n")
+
 #  ================== Upload the file to the File API ======================
 uploaded_file = client.files.upload(
     file='my-batch-requests.jsonl',
@@ -16,7 +34,7 @@ uploaded_file = client.files.upload(
 
 print(f"Uploaded file: {uploaded_file.name}")
 
-# ==================== CREATE BATCHE JOB =============================
+# ==================== CREATE BATCH JOB =============================
 
 # Assumes `uploaded_file` is the file object from the previous step
 file_batch_job = client.batches.create(
